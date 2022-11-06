@@ -1,29 +1,54 @@
 from torch import nn
+import torch
 
 class DCGANSNGenerator(nn.Module):
-    
+
     def __init__(self, z_dim):
         super(DCGANSNGenerator, self).__init__()
-
-        # taken from https://github.com/christiancosgrove/pytorch-spectral-normalization-gan
-        # with spectral norm from pytorch
-
         channels = 3
-        self.model = nn.Sequential(
-            nn.ConvTranspose2d(z_dim, 512, 4, stride=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
-            nn.ConvTranspose2d(512, 256, 4, stride=2, padding=(1,1)),
-            nn.BatchNorm2d(256),
-            nn.ReLU(),
-            nn.ConvTranspose2d(256, 128, 4, stride=2, padding=(1,1)),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.ConvTranspose2d(128, 64, 4, stride=2, padding=(1,1)),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.ConvTranspose2d(64, channels, 3, stride=1, padding=(1,1)),
-            nn.Tanh())
+        input_dim = 4
+        label_dim = 4
+        conv_1 = nn.ConvTranspose2d(label_dim, 512, 4, stride=1, padding=0)
+        conv_2 =  nn.ConvTranspose2d(input_dim, 512, 4, stride=1, padding=0)
+        conv_3 = nn.ConvTranspose2d(512, 256, 4, stride=2, padding=(1,1))
+        conv_4 = nn.ConvTranspose2d(256, 128, 4, stride=2, padding=(1,1))
+        conv_5 = nn.ConvTranspose2d(128, 64, 4, stride=2, padding=(1,1))
+        conv_6 = nn.ConvTranspose2d(64, channels, 3, stride=1, padding=(1,1))
 
-    def forward(self, z):
-        return self.model(z.view(-1, self.z_dim, 1, 1))
+        nn.init.xavier_uniform_(conv_1.weight.data, 1.)
+        nn.init.xavier_uniform_(conv_2.weight.data, 1.)
+        nn.init.xavier_uniform_(conv_3.weight.data, 1.)
+        nn.init.xavier_uniform_(conv_4.weight.data, 1.)
+        nn.init.xavier_uniform_(conv_5.weight.data, 1.)
+        nn.init.xavier_uniform_(conv_6.weight.data, 1.)
+
+        self.input_layers = nn.Sequential(
+                conv_1,
+                nn.BatchNorm2d(512),
+                nn.ReLU())
+
+        self.label_layers = nn.Sequential(
+                conv_2,
+                nn.BatchNorm2d(512),
+                nn.ReLU())
+
+        self.joint_layers = nn.Sequential(
+                conv_3,
+                nn.BatchNorm2d(256),
+                nn.ReLU(),
+                conv_4,
+                nn.BatchNorm2d(128),
+                nn.ReLU(),
+                conv_5,
+                nn.BatchNorm2d(64),
+                nn.ReLU(),
+                conv_6,
+                nn.Tanh())
+
+
+    def forward(self, z,c):
+        h1 = self.inputs_layers(z)
+        h2 = self.label_layers(c)
+        x = torch.cat([h1, h2], 1)
+        out = self.joint_layers(x)
+        return out
