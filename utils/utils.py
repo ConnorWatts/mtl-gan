@@ -2,9 +2,16 @@ from models.model import Model
 from models.generator import DCGANSNGenerator
 
 def get_generator(params):
-    z_dim = params.z_dim
-    if params.nn_type == 'DCGAN-SN':
-        return DCGANSNGenerator(z_dim)
+
+    z_dim = params['z_dim']
+
+    # arb value
+    arb_value = 10
+
+    if params['nn_type'] == 'DCGAN-SN':
+        return DCGANSNGenerator(z_dim), arb_value
+
+    
     return True
 
 def get_heads(params):
