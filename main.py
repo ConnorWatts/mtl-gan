@@ -1,16 +1,32 @@
 from utils.utils import get_model
 from data.utils import get_data_loader
+import argparse
 
 
 def main(params):
-    #code here
+    #potentially make a runner class
     train_loader, test_loader, valid_loader = get_data_loader(params,params['num_workers'])
     model = get_model(params)
     return True 
 
+def get_args() -> dict:
+    parser = argparse.ArgumentParser(description='MTL GAN')
+
+    parser.add_argument("--num_workers", type=int, help="Number of Workers", default=2)
+    parser.add_argument("--batch_size", type=int, help="Batch size for training", default=32)
+    parser.add_argument("--dataset", type=str, help="Dataset name", default="Cifar100")
+    parser.add_argument("--z_dim", type=int, help="Dimension of latent dimension", default=100)
+    parser.add_argument("--nn_type", type=str, help="Neural network name", default="DCGAN-SN")
+
+    args = parser.parse_args()
+
+    # Wrapping training configuration into a dictionary
+    training_config = dict()
+    for arg in vars(args):
+        training_config[arg] = getattr(args, arg)
+
+    return training_config
 
 
 if __name__ == "__main__":
-    params = {'num_workers': 2, 'batch_size':32,'dataset':'Cifar100','z_dim':100,'nn_type':'DCGAN-SN'}
-    main(params)
-    print('Finished!')
+    main(get_args())
