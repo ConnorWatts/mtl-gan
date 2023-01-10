@@ -1,4 +1,4 @@
-from utils.utils import get_model
+
 from data.utils import get_data_loader
 import argparse
 from runner import ModelRunner
@@ -8,8 +8,6 @@ def main(args):
     
     model = ModelRunner(args)
 
-    #train_loader, test_loader, valid_loader = get_data_loader(params,params['num_workers'])
-    #model = get_model(params)
     return True 
 
 def get_args() -> dict:
@@ -20,6 +18,9 @@ def get_args() -> dict:
     parser.add_argument("--dataset", type=str, help="Dataset name", default="Cifar100")
     parser.add_argument("--z_dim", type=int, help="Dimension of latent dimension", default=100)
     parser.add_argument("--nn_type", type=str, help="Neural network name", default="DCGAN-SN")
+    parser.add_argument("--seed", type=int, help="Seed of randomness", default=4)
+    parser.add_argument("--device", type=int, help="Device for running", default=1)
+
 
     args = parser.parse_args()
 
