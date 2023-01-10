@@ -1,12 +1,15 @@
 from utils.utils import get_model
 from data.utils import get_data_loader
 import argparse
+from runner import ModelRunner
 
 
-def main(params):
-    #potentially make a runner class
-    train_loader, test_loader, valid_loader = get_data_loader(params,params['num_workers'])
-    model = get_model(params)
+def main(args):
+    
+    model = ModelRunner(args)
+
+    #train_loader, test_loader, valid_loader = get_data_loader(params,params['num_workers'])
+    #model = get_model(params)
     return True 
 
 def get_args() -> dict:

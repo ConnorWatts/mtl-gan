@@ -1,3 +1,3 @@
 # MultiTaskGAN
 check
-check push
+check pushv  
