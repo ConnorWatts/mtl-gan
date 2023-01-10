@@ -14,6 +14,7 @@ class ModelRunner:
 
         self.generator = get_generator(args)
         self.heads = get_heads(args)
+        self.noise_gen = utils.get_latent_noise(args)
 
         self.optimizer = utils.get_optimizer(args)
 
@@ -23,6 +24,8 @@ class ModelRunner:
         self.device = utils.assign_device(args['device'])
 
     def train(self):
+
+
         pass
 
     def train_epoch(self):
