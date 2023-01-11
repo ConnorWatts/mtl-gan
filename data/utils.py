@@ -2,16 +2,18 @@ from torchvision.datasets import CIFAR100
 import torchvision.transforms as transforms
 import torch
 
-def get_data_loader(params,num_workers):
+def get_data_loader(args):
 
     transform_train = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    b_size = params['batch_size']
+    b_size = args['batch_size']
+    num_workers = args['num_workers']
 
-    if params['dataset'] == 'Cifar100':
+
+    if args['dataset'] == 'Cifar100':
 
         trainset = CIFAR100(root='./data', train=True, download=True, transform=transform_train)
         testset = CIFAR100(root='./data', train=False, download=True, transform=transform_train)
