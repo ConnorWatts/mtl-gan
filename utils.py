@@ -26,8 +26,10 @@ def get_scheduler(args):
 
     pass
 
-def get_latent_noise(args,dim,device):
-    dim = int(dim)
+def get_latent_noise(args,device):
+
+    dim = int(args['z_dim'])
+
     if args['latent_noise'] =='gaussian':
         loc = torch.zeros(dim).to(device)
         scale = torch.ones(dim).to(device)
