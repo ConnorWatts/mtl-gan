@@ -4,11 +4,17 @@ import argparse
 from runner import ModelRunner
 
 
-def main(args):
+def main(args) -> None:
     
     model = ModelRunner(args)
 
-    return True 
+    print('Running mode: {}'.format(args['mode']))
+    if args['mode'] == 'train':
+        model.train()
+    elif args['mode'] == 'eval':
+        model.eval()
+    else:
+        raise NotImplementedError('Running mode {} not recognised.'.format(args['mode']))
 
 def get_args() -> dict:
     parser = argparse.ArgumentParser(description='MTL GAN')
@@ -21,6 +27,15 @@ def get_args() -> dict:
     parser.add_argument("--seed", type=int, help="Seed of randomness", default=4)
     parser.add_argument("--device", type=int, help="Device for running", default=1)
     parser.add_argument("--latent_noise", type=str, help="Distribution of random noise", default="uniform")
+    parser.add_argument("--mode", type=str, help="Mode to run", default="train")
+
+    parser.add_argument('--optimizer', default='Adam', type= str, help='Optimizer for model')
+    parser.add_argument('--lr_heads', default=0.0002, type=float, help='learning rate for the heads module')
+    parser.add_argument('--lr_generator', default=0.0002, type=float, help='learning rate for the generator')
+    parser.add_argument('--sgd_momentum', default=0., type=float, help='momentum parameter for SGD [0.]')
+    parser.add_argument('--beta_1', default=0.5, type=float, help='first parameter of Adam optimizer [.5]')
+    parser.add_argument('--beta_2', default=0.9, type=float, help='second parameter of Adam optimizer [.9]')
+    parser.add_argument('--weight_decay', default=0.0, type=float, help='weight decay [0.]')
 
 
     args = parser.parse_args()

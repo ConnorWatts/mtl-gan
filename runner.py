@@ -21,7 +21,7 @@ class ModelRunner:
         self.noise_gen = utils.get_latent_noise(args,self.device)
 
         self.optimizer_g = utils.get_optimizer(args,'generator', self.generator.parameters())
-        self.optimizer_heads = utils.get_optimizer(args, 'heads', self.heads.parameters())
+        #self.optimizer_heads = utils.get_optimizer(args, 'heads', self.heads.parameters())
 
         self.loss = utils.get_loss(args)
 
