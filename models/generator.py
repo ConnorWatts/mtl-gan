@@ -2,22 +2,59 @@ from torch import nn
 import torch
 
 class TestGenerator(nn.Module):
-        def __init__(self,z_dim) -> None:
+        def __init__(self,z_dim,num_classes) -> None:
              super().__init__()
 
-             #consider using embedding??
+             # maybe be nicer this way
+             # self.net = nn.Sequential(
+             # *vanilla_block(num_neurons_per_layer[0], num_neurons_per_layer[1]),
+             # vanilla_block(num_neurons_per_layer[1], num_neurons_per_layer[2]),
 
              self.z_dim = z_dim
+             self.num_classes = num_classes
+             self.label_embedding = nn.Embedding(self.num_classes, self.num_classes)
 
-             conv_1 = nn.ConvTranspose2d(self.z_dim, 512, 4, stride=1, padding=0)
+             latent_conv = nn.ConvTranspose2d(self.z_dim, 512, 4, stride=1, padding=0)
+             label_conv = nn.ConvTranspose2d(self.num_classes, 512, 4, stride=1, padding=0)
+             #should this be 521 > 256
+             joint_conv1 = nn.ConvTranspose2d(1024, 512, 4,  stride=2, padding=(1,1))
+             joint_conv2 = nn.ConvTranspose2d(512, 256, 4,  stride=2, padding=(1,1))
+             joint_conv3 = nn.ConvTranspose2d(256, 3, 4,  stride=2, padding=(1,1))
+             #joint_conv4 = nn.ConvTranspose2d(128, 64, 4,  stride=2, padding=(1,1))
+             #joint_conv5 = nn.ConvTranspose2d(64, 3, 4,  stride=2, padding=(1,1))
+        
 
-             self.input_layers = nn.Sequential(
-                conv_1,
+             self.latent_layer = nn.Sequential(
+                latent_conv,
                 nn.BatchNorm2d(512),
-                nn.ReLU())
+                nn.LeakyReLU())
+
+             self.label_layer = nn.Sequential(
+                label_conv,
+                nn.BatchNorm2d(512),
+                nn.LeakyReLU())
+
+             self.joint_layers = nn.Sequential(
+                joint_conv1,
+                nn.BatchNorm2d(512),
+                nn.LeakyReLU(),
+                joint_conv2,
+                nn.BatchNorm2d(256),
+                nn.LeakyReLU(),
+                joint_conv3,
+                #nn.BatchNorm2d(128),
+                #nn.LeakyReLU(),
+                #joint_conv4,
+                #nn.BatchNorm2d(64),
+                #.LeakyReLU(),
+                #joint_conv5,
+                nn.Tanh())
 
         def forward(self,z,c):
-                return self.input_layers(z.view(-1, self.z_dim, 1, 1))
+                h1 = self.latent_layer(z.view(-1, self.z_dim, 1, 1))
+                h2 = self.label_layer(self.label_embedding(c).view(-1, self.num_classes,1,1))
+                j1 = self.joint_layers(torch.cat([h1,h2],1))
+                return j1
   
 
 
