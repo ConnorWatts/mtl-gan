@@ -9,7 +9,7 @@ def get_data_loader(args):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    b_size = args['batch_size']
+    b_size = args['batch_size_train']
     num_workers = args['num_workers']
 
 

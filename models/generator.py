@@ -1,6 +1,29 @@
 from torch import nn
 import torch
 
+class TestGenerator(nn.Module):
+        def __init__(self,z_dim) -> None:
+             super().__init__()
+
+             #consider using embedding??
+
+             self.z_dim = z_dim
+
+             conv_1 = nn.ConvTranspose2d(self.z_dim, 512, 4, stride=1, padding=0)
+
+             self.input_layers = nn.Sequential(
+                conv_1,
+                nn.BatchNorm2d(512),
+                nn.ReLU())
+
+        def forward(self,z,c):
+                return self.input_layers(z.view(-1, self.z_dim, 1, 1))
+  
+
+
+
+
+
 class DCGANSNGenerator(nn.Module):
 
     def __init__(self, z_dim):

@@ -40,6 +40,14 @@ def get_latent_noise(args,device):
     else:
         raise NotImplementedError('Latent Distribution {} not recognised.'.format(args['latent_noise'] ))  
 
+def get_class_dist(args,device):
+    num_classes = args['num_classes']
+    labels = 1.*np.array(range(num_classes))/num_classes
+    labels= torch.tensor(list(labels)).to(device)
+    return torch.distributions.categorical.Categorical(labels)
+
+    pass
+
 def set_random_seeds(seed):
     if seed is not None:
         torch.manual_seed(seed)
@@ -47,4 +55,5 @@ def set_random_seeds(seed):
         random.seed(seed)
 
 def assign_device(device):
-    pass
+    return 'cpu'
+
