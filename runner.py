@@ -39,9 +39,8 @@ class ModelRunner:
 
         z = self.latent_noise_gen.sample([self.batch_size_train])
         c = self.class_dist.sample([self.batch_size_train])
-        z_ = z.view(-1, 100, 1, 1)
         output = self.generator(z,c)
-        print('Hello')
+
 
         #for epoch in range(self.max_train_epoch):
 
