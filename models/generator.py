@@ -1,7 +1,7 @@
 from torch import nn
 import torch
 
-class TestGenerator(nn.Module):
+class DCGANSNGenerator(nn.Module):
         def __init__(self,z_dim,num_classes) -> None:
              super().__init__()
 
@@ -61,10 +61,10 @@ class TestGenerator(nn.Module):
 
 
 
-class DCGANSNGenerator(nn.Module):
+class DCGANSNGeneratorOld(nn.Module):
 
     def __init__(self, z_dim):
-        super(DCGANSNGenerator, self).__init__()
+        super(DCGANSNGeneratorOld, self).__init__()
         channels = 3
         input_dim = 4
         label_dim = 4
