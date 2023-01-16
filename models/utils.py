@@ -15,14 +15,23 @@ def get_generator(args):
 
 def get_shared_decoder(args):
     if args['nn_type'] == 'DCGAN-SN':
-        return DCGANSNDiscriminator()
+        # arb channel number at the moment 
+        return DCGANSNDiscriminator(), 7
 
 
 def get_head(args,channels,task):
 
     # find a way to assign number of classes to each task
+    # maybe use channels as well
+
     if task == 'gan':
         return Head(2)
+    elif task == 'fine':
+        return Head(100)
+    elif task == 'coarse':
+        return Head(10)
+    else:
+        raise NotImplementedError('Task {} not recognised.'.format(task))  
 
 
 
