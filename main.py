@@ -31,6 +31,8 @@ def get_args() -> dict:
     parser.add_argument("--mode", type=str, help="Mode to run", default="train")
     parser.add_argument("--max_train_epochs", type=int, help="Maximum number of epochs to train model", default=10)
     parser.add_argument("--num_classes", type=int, help="Number of classes", default=100)
+    parser.add_argument("--tasks", type=list, help="List of tasks", default=['gan'])
+
 
     parser.add_argument('--optimizer', default='Adam', type= str, help='Optimizer for model')
     parser.add_argument('--lr_heads', default=0.0002, type=float, help='learning rate for the heads module')
