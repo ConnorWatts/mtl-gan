@@ -1,7 +1,11 @@
 import torch
+from torch import nn
 import numpy as np
 import random
 import torch.optim as optim
+
+from losses.loss_schemes import MultiTaskLoss
+from losses.loss_functions import 
 
 #maybe move these inside utils folder
 
@@ -18,9 +22,35 @@ def get_optimizer(args,nn_type,nn_params):
         raise NotImplementedError('Optimizer {} not recognised.'.format(args['optimizer']))    
     return optimizer
 
-def get_loss(args):
 
-    pass
+def wasserstein_loss(true_data,fake_data,network_type):
+    if network_type=='decoders':
+        return -true_data.mean() + fake_data.mean()
+    else:
+        return -fake_data.mean()
+
+
+def get_loss_ft(args,task):
+
+    if task == 'gan':
+        if args['gan_loss'] == 'classic':
+            return nn.BCELoss()
+        elif args['gan_loss'] == 'wasserstein':
+            return wasserstein_loss
+    else:
+        # make smarter
+        return nn.CrossEntropyLoss()
+
+
+
+def get_loss(args,network_type):
+
+    tasks = args['tasks']
+    loss_fts = torch.nn.ModuleDict({task: get_loss_ft(args, task) for task in tasks})
+    loss_weights = args['loss_weights']
+    return MultiTaskLoss(tasks, loss_fts, loss_weights)
+
+
 
 def get_scheduler(args):
 
