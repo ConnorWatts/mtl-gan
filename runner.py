@@ -31,7 +31,8 @@ class ModelRunner:
         self.optimizer_g = utils.get_optimizer(args,'generator', self.generator.parameters())
         self.optimizer_d = utils.get_optimizer(args, 'heads', self.decoders.parameters())
 
-        self.loss = utils.get_loss(args)
+        self.loss_g = utils.get_loss(args,'generator')
+        self.loss_d = utils.get_loss(args,'decoders')
 
         #maybe think about setting 
 
@@ -44,26 +45,21 @@ class ModelRunner:
     def train(self):
 
         # maybe make ConditionalNoiseGen class(see GEBM)
-
-        z = self.latent_noise_gen.sample([self.batch_size_train])
-        c = self.class_dist.sample([self.batch_size_train])
-        output = self.generator(z,c)
-        output = self.decoders(output)
-        print('yes')
         for epoch in range(self.max_train_epoch):
             self.train_epoch()
 
     def train_epoch(self):
 
         for batch_idx, data in enumerate(self.train_loader):
-            check = data
+            decoders_loss = self.batch_step(data,'decoders',train_mode=True)
+            generator_loss = self.batch_step(data,'generator',train_mode=True)
 
     
 
     def eval(self):
         pass
 
-    def batch_step(self,data,net_type,train_mode):
+    def batch_step(self,data,targets,net_type,train_mode):
 
         # modified from https://github.com/MichaelArbel/GeneralizedEBM/blob/b2fb244bacef23a7347aecc0e8ff4863153f94f0/trainer.py#L165
 
@@ -80,7 +76,10 @@ class ModelRunner:
             true_results = self.decoders(data)
             fake_results = self.decoders(fake_data)
 
-        loss = self.loss(true_results, fake_results, net_type)
+        if net_type == 'generator':
+            loss = self.loss_g(true_results, fake_results)
+        elif net_type == 'decoders':
+            loss = self.loss_d(true_results, fake_results)
 
         if train_mode:
             total_loss = self.add_penalty(loss, net_type, data, fake_data)

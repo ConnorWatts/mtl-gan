@@ -5,7 +5,7 @@ import random
 import torch.optim as optim
 
 from losses.loss_schemes import MultiTaskLoss
-from losses.loss_functions import 
+#from losses.loss_functions import 
 
 #maybe move these inside utils folder
 
@@ -23,32 +23,44 @@ def get_optimizer(args,nn_type,nn_params):
     return optimizer
 
 
-def wasserstein_loss(true_data,fake_data,network_type):
-    if network_type=='decoders':
-        return -true_data.mean() + fake_data.mean()
-    else:
+def wasserstein_dec_loss(true_data,fake_data):
+    return -true_data.mean() + fake_data.mean()
+
+def wasserstein_gen_loss(true_data,fake_data):
         return -fake_data.mean()
 
 
-def get_loss_ft(args,task):
+def get_dec_loss_ft(args,task):
 
     if task == 'gan':
         if args['gan_loss'] == 'classic':
             return nn.BCELoss()
         elif args['gan_loss'] == 'wasserstein':
-            return wasserstein_loss
+            return wasserstein_dec_loss
     else:
         # make smarter
         return nn.CrossEntropyLoss()
+
+def get_gen_loss_ft(args):
+    if args['gan_loss'] == 'classic':
+            return nn.BCELoss()
+    elif args['gan_loss'] == 'wasserstein':
+            return wasserstein_gen_loss
+
 
 
 
 def get_loss(args,network_type):
 
-    tasks = args['tasks']
-    loss_fts = torch.nn.ModuleDict({task: get_loss_ft(args, task) for task in tasks})
-    loss_weights = args['loss_weights']
-    return MultiTaskLoss(tasks, loss_fts, loss_weights)
+    if network_type == 'generator':
+        loss_ft = get_gen_loss_ft(args)
+        return loss_ft
+
+    elif network_type == 'decoders':
+        tasks = args['tasks']
+        loss_fts = torch.nn.ModuleDict({task: get_dec_loss_ft(args, task) for task in tasks})
+        loss_weights = args['loss_weights']
+        return MultiTaskLoss(tasks, loss_fts, loss_weights)
 
 
 
