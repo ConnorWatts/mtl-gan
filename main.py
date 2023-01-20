@@ -19,7 +19,7 @@ def main(args) -> None:
 def get_args() -> dict:
     parser = argparse.ArgumentParser(description='MTL GAN')
 
-    parser.add_argument("--num_workers", type=int, help="Number of Workers", default=2)
+    parser.add_argument("--num_workers", type=int, help="Number of Workers", default=0)
     parser.add_argument("--batch_size_train", type=int, help="Batch size for training", default=32)
     parser.add_argument("--dataset", type=str, help="Dataset name", default="Cifar100")
     parser.add_argument("--z_dim", type=int, help="Dimension of latent dimension", default=100)
@@ -31,9 +31,9 @@ def get_args() -> dict:
     parser.add_argument("--mode", type=str, help="Mode to run", default="train")
     parser.add_argument("--max_train_epochs", type=int, help="Maximum number of epochs to train model", default=10)
     parser.add_argument("--num_classes", type=int, help="Number of classes", default=100)
-    parser.add_argument("--tasks", type=list, help="List of tasks", default=['gan'])
+    parser.add_argument("--tasks", type=list, help="List of tasks", default=['gan','fine','coarse'])
     parser.add_argument("--gan_loss", type=str, help="Loss function for GAN", default='classic')
-    parser.add_argument("--loss_weights", type=dict, help="List of weights for the losses", default={'gan':1})
+    parser.add_argument("--loss_weights", type=dict, help="List of weights for the losses", default={'gan':0.3,'fine':0.3,'coarse':0.3})
 
 
 

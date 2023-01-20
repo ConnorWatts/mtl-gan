@@ -51,43 +51,76 @@ class ModelRunner:
     def train_epoch(self):
 
         for batch_idx, data in enumerate(self.train_loader):
-            images = data['image'].cuda(non_blocking=True)
-            targets = {task: data[task].cuda(non_blocking=True) for task in self.args['tasks']}
-            decoders_loss = self.batch_step(images,targets,'decoders',train_mode=True)
-            generator_loss = self.batch_step(images,targets,'generator',train_mode=True)
+            decoders_loss = self.batch_step(data,'decoders',train_mode=True)
+            generator_loss = self.batch_step(data,'generator',train_mode=True)
 
     
 
     def eval(self):
         pass
 
-    def batch_step(self,data,targets,net_type,train_mode):
+    def batch_step(self,data,net_type,train_mode):
 
         # modified from https://github.com/MichaelArbel/GeneralizedEBM/blob/b2fb244bacef23a7347aecc0e8ff4863153f94f0/trainer.py#L165
 
         optimizer = self.prepare_optimizer(net_type)
 
+        images = data['images']#.cuda(non_blocking=True)
+
         z = self.latent_noise_gen.sample([self.batch_size_train])
         c = self.class_dist.sample([self.batch_size_train])
+
+        real_targets = self.get_real_targets(data)
+        fake_targets = self.get_fake_targets(c)
 
         with_gen_grad = train_mode and (net_type=='generator')
         with torch.set_grad_enabled(with_gen_grad):
             fake_data = self.generator(z,c)
 
         with torch.set_grad_enabled(train_mode):
-            true_results = self.decoders(data)
+            real_results = self.decoders(data)
             fake_results = self.decoders(fake_data)
 
         if net_type == 'generator':
-            loss = self.loss_g(true_results, fake_results)
+            loss = self.loss_g(real_results, fake_results,real_targets,fake_targets)
         elif net_type == 'decoders':
-            loss = self.loss_d(true_results, fake_results)
+            loss = self.loss_d(real_results, fake_results,real_targets,fake_targets)
 
         if train_mode:
             total_loss = self.add_penalty(loss, net_type, data, fake_data)
             total_loss.backward()
             optimizer.step()
         return loss
+
+    def get_real_targets(self,data):
+
+        # v1 - write better
+
+        out = {'gan': torch.ones(data['images'].shape[0]).to(data['images'].device)}
+
+        for task in self.args['tasks']:
+            if task == 'gan':
+                continue
+            else:
+                out[task] = data[task]
+        return out
+
+    def get_fake_targets(self,data):
+
+        # v1 - write better
+
+        out = {'gan': torch.zeros(data.shape[0]).to(data.device)}
+
+        for task in self.args['tasks']:
+            if task == 'gan':
+                continue
+            else:
+                if task == 'fine':
+                    out[task] = data
+                else:
+                    out[task] = utils.get_coarse_label(data)
+        return out
+
 
 
     def prepare_optimizer(self,net_type):
