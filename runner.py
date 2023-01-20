@@ -51,8 +51,10 @@ class ModelRunner:
     def train_epoch(self):
 
         for batch_idx, data in enumerate(self.train_loader):
-            decoders_loss = self.batch_step(data,'decoders',train_mode=True)
-            generator_loss = self.batch_step(data,'generator',train_mode=True)
+            images = data['image'].cuda(non_blocking=True)
+            targets = {task: data[task].cuda(non_blocking=True) for task in self.args['tasks']}
+            decoders_loss = self.batch_step(images,targets,'decoders',train_mode=True)
+            generator_loss = self.batch_step(images,targets,'generator',train_mode=True)
 
     
 
