@@ -51,8 +51,8 @@ def get_data_loader(args):
     num_workers = args['num_workers']
 
     def collate_batch(batch):
-
-        images = [torch.Tensor(sample[0]) for sample in batch]
+        
+        images = torch.stack([sample[0] for sample in batch])
         batch_output = {'images' : images}
         if 'fine' in args['tasks']:
             #batch_output['fine'] = [torch.Tensor(to_categorical(sample[1],num_classes=100)) for sample in batch]
@@ -61,7 +61,6 @@ def get_data_loader(args):
             #batch_output['coarse'] = [torch.Tensor(to_categorical(get_coarse_label(sample[1]),num_classes=20)) for sample in batch]
             batch_output['coarse'] = torch.Tensor([get_coarse_label(sample[1]) for sample in batch])
         return batch_output
-        #return batch
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=b_size, shuffle=True, num_workers=num_workers,collate_fn=collate_batch)
     testloader = torch.utils.data.DataLoader(testset, batch_size=b_size, shuffle=False, num_workers=num_workers, collate_fn=collate_batch)

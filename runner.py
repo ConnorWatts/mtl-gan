@@ -78,7 +78,7 @@ class ModelRunner:
             fake_data = self.generator(z,c)
 
         with torch.set_grad_enabled(train_mode):
-            real_results = self.decoders(data)
+            real_results = self.decoders(images)
             fake_results = self.decoders(fake_data)
 
         if net_type == 'generator':
@@ -96,7 +96,7 @@ class ModelRunner:
 
         # v1 - write better
 
-        out = {'gan': torch.ones(data['images'].shape[0]).to(data['images'].device)}
+        out = {'gan': torch.ones(len(data['images']))}
 
         for task in self.args['tasks']:
             if task == 'gan':
@@ -109,7 +109,7 @@ class ModelRunner:
 
         # v1 - write better
 
-        out = {'gan': torch.zeros(data.shape[0]).to(data.device)}
+        out = {'gan': torch.zeros(len(data))}
 
         for task in self.args['tasks']:
             if task == 'gan':
@@ -118,7 +118,7 @@ class ModelRunner:
                 if task == 'fine':
                     out[task] = data
                 else:
-                    out[task] = utils.get_coarse_label(data)
+                    out[task] = torch.Tensor(utils.get_coarse_label(data))
         return out
 
 
