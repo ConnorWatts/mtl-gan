@@ -31,8 +31,8 @@ class ModelRunner:
         self.optimizer_g = utils.get_optimizer(args,'generator', self.generator.parameters())
         self.optimizer_d = utils.get_optimizer(args, 'heads', self.decoders.parameters())
 
-        self.loss_g = utils.get_loss(args,'generator')
-        self.loss_d = utils.get_loss(args,'decoders')
+        self.loss = utils.get_loss(args)
+
 
         #maybe think about setting 
 
@@ -82,9 +82,9 @@ class ModelRunner:
             fake_results = self.decoders(fake_data)
 
         if net_type == 'generator':
-            loss = self.loss_g(real_results, fake_results,real_targets,fake_targets)
+            loss = self.loss(real_results, fake_results,real_targets,fake_targets,'generator')
         elif net_type == 'decoders':
-            loss = self.loss_d(real_results, fake_results,real_targets,fake_targets)
+            loss = self.loss(real_results, fake_results,real_targets,fake_targets,'decoders')
 
         if train_mode:
             total_loss = self.add_penalty(loss, net_type, data, fake_data)
