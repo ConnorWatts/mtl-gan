@@ -23,7 +23,14 @@ def get_optimizer(args,nn_type,nn_params):
     return optimizer
 
 def binary_cross_loss(true_data, false_data,true_target,false_target,network_type):
-    pass
+    loss_f = nn.BCEWithLogitsLoss()
+    if network_type == 'decoders':
+        true_loss = loss_f(true_data.argmax(dim=1).float(),true_target)
+        false_loss = loss_f(false_data.argmax(dim=1).float(),false_target)
+        loss = true_loss + false_loss
+    else:
+        loss = loss_f(false_data.argmax(dim=1).float(),true_target)
+    return loss
 
 def wasserstein_loss(true_data, false_data,true_target,false_target,network_type):
 
@@ -34,21 +41,27 @@ def wasserstein_loss(true_data, false_data,true_target,false_target,network_type
 
 
 def cross_ent_loss(true_data, false_data,true_target,false_target,network_type):
-    pass
-
+    loss_f = nn.CrossEntropyLoss()
+    if network_type == 'decoders':
+        true_loss = loss_f(true_data,true_target.long())
+        false_loss = loss_f(false_data,false_target.long())
+        loss = true_loss + false_loss
+    if network_type == 'generator':
+        loss = loss_f(false_data,false_target.long())
+    return loss
 
 
 def get_gan_loss(args):
 
     if args['gan_loss'] == 'classic':
-            return binary_cross_loss
+        return binary_cross_loss
     elif args['gan_loss'] == 'wasserstein':
-            return wasserstein_loss
+        return wasserstein_loss
 
 def get_task_loss(args):
 
     if args['task_loss'] == 'classic':
-            return cross_ent_loss
+        return cross_ent_loss
 
 
 def get_loss_ft(args,task):
@@ -61,16 +74,13 @@ def get_loss_ft(args,task):
     else:
         return get_task_loss(args)
     
-
-
-def get_loss(args,network_type):
+def get_loss(args):
 
     tasks = args['tasks']
-    loss_fts = torch.nn.ModuleDict({task: get_loss_ft(args, task) for task in tasks})
+    #loss_fts = torch.nn.ModuleDict({task: get_loss_ft(args, task) for task in tasks})
+    loss_fts = {task: get_loss_ft(args, task) for task in tasks}
     loss_weights = args['loss_weights']
     return MultiTaskLoss(tasks, loss_fts, loss_weights)
-
-
 
 def get_scheduler(args):
 

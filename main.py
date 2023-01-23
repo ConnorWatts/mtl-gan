@@ -33,6 +33,7 @@ def get_args() -> dict:
     parser.add_argument("--num_classes", type=int, help="Number of classes", default=100)
     parser.add_argument("--tasks", type=list, help="List of tasks", default=['gan','fine','coarse'])
     parser.add_argument("--gan_loss", type=str, help="Loss function for GAN", default='classic')
+    parser.add_argument("--task_loss", type=str, help="Loss function for task", default='classic')
     parser.add_argument("--loss_weights", type=dict, help="List of weights for the losses", default={'gan':0.3,'fine':0.3,'coarse':0.3})
 
 

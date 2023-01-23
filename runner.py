@@ -87,8 +87,9 @@ class ModelRunner:
             loss = self.loss(real_results, fake_results,real_targets,fake_targets,'decoders')
 
         if train_mode:
-            total_loss = self.add_penalty(loss, net_type, data, fake_data)
-            total_loss.backward()
+            #total_loss = self.add_penalty(loss, net_type, data, fake_data)
+            loss['total'].backward()
+            #total_loss.backward()
             optimizer.step()
         return loss
 

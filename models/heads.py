@@ -8,5 +8,6 @@ class Head(nn.Module):
           self.conv2 = nn.Conv2d(8,num_classes,4,2,1)
 
      def forward(self,x):
-
-          return torch.sigmoid(self.conv2(self.conv1(x)))
+          output = torch.sigmoid(self.conv2(self.conv1(x)))
+          output = output.squeeze()
+          return output

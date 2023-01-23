@@ -24,12 +24,14 @@ def get_head(args,channels,task):
     # find a way to assign number of classes to each task
     # maybe use channels as well
 
+    # if its wasserstein then num_classes would be zero
+
     if task == 'gan':
         return Head(2)
     elif task == 'fine':
         return Head(100)
     elif task == 'coarse':
-        return Head(10)
+        return Head(20)
     else:
         raise NotImplementedError('Task {} not recognised.'.format(task))  
 
