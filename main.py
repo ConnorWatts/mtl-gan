@@ -26,7 +26,7 @@ def get_args() -> dict:
     parser.add_argument("--nn_type", type=str, help="Neural network name", default="DCGAN-SN")
     #parser.add_argument("--nn_type", type=str, help="Neural network name", default="Test")
     parser.add_argument("--seed", type=int, help="Seed of randomness", default=4)
-    parser.add_argument("--device", type=int, help="Device for running", default=1)
+    parser.add_argument("--device", type=int,  help="Device for running", default=1)
     parser.add_argument("--latent_noise", type=str, help="Distribution of random noise", default="uniform")
     parser.add_argument("--mode", type=str, help="Mode to run", default="train")
     parser.add_argument("--max_train_epochs", type=int, help="Maximum number of epochs to train model", default=10)
