@@ -77,7 +77,6 @@ def get_loss_ft(args,task):
 def get_loss(args):
 
     tasks = args['tasks']
-    #loss_fts = torch.nn.ModuleDict({task: get_loss_ft(args, task) for task in tasks})
     loss_fts = {task: get_loss_ft(args, task) for task in tasks}
     loss_weights = args['loss_weights']
     return MultiTaskLoss(tasks, loss_fts, loss_weights)

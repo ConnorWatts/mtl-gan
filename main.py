@@ -35,7 +35,7 @@ def get_args() -> dict:
     parser.add_argument("--gan_loss", type=str, help="Loss function for GAN", default='classic')
     parser.add_argument("--task_loss", type=str, help="Loss function for task", default='classic')
     parser.add_argument("--loss_weights", type=dict, help="List of weights for the losses", default={'gan':0.3,'fine':0.3,'coarse':0.3})
-
+    parser.add_argument("--enable_tensorboard", type=bool, help="Flag to enable tensorboard", default=True)
 
 
     parser.add_argument('--optimizer', default='Adam', type= str, help='Optimizer for model')
