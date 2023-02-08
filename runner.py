@@ -1,5 +1,4 @@
 import torch
-
 import utils
 from models.utils import get_generator, get_decoders
 from data.utils import get_data_loader
@@ -8,35 +7,43 @@ from torch.utils.tensorboard import SummaryWriter
 
 class ModelRunner:
 
-    def __init__(self,args):
+    def __init__(self, config: dict) -> None:
+        super().__init__()
 
-        self.args = args
-        self.max_train_epoch = args['max_train_epochs']
-        self.batch_size_train = args['batch_size_train']
-
+        """
+        Constructs an Agent to run the MTL GAN Experiment
         
-        self.enable_tb = args['enable_tensorboard']
+        :param config: Dict denoting the command line inputs to be 
+            used as the configuration of the experiment 
+
+        """
+
+        self.config = config
+        self.max_train_epoch = config['max_train_epochs']
+        self.batch_size_train = config['batch_size_train']
+
+        self.enable_tb = config['enable_tensorboard']
         if self.enable_tb:
             self.writer = SummaryWriter()
 
-        utils.set_random_seeds(args['seed'])
+        utils.set_random_seeds(config['seed'])
 
         self.device= torch.device("cuda" if torch.cuda.is_available() else "cpu")  
         #self.device = utils.assign_device(args['device'])
 
-        self.train_loader, self.test_loader, self.valid_loader = get_data_loader(args)
+        self.train_loader, self.test_loader, self.valid_loader = get_data_loader(config)
         self.train_loader_size = len(self.train_loader)
 
-        self.generator = get_generator(args)
-        self.decoders = get_decoders(args)
+        self.generator = get_generator(config)
+        self.decoders = get_decoders(config)
 
-        self.latent_noise_gen = utils.get_latent_noise(args,self.device)
-        self.class_dist = utils.get_class_dist(args,self.device)
+        self.latent_noise_gen = utils.get_latent_noise(config,self.device)
+        self.class_dist = utils.get_class_dist(config,self.device)
 
-        self.optimizer_g = utils.get_optimizer(args,'generator', self.generator.parameters())
-        self.optimizer_d = utils.get_optimizer(args, 'heads', self.decoders.parameters())
+        self.optimizer_g = utils.get_optimizer(config,'generator', self.generator.parameters())
+        self.optimizer_d = utils.get_optimizer(config, 'heads', self.decoders.parameters())
 
-        self.loss = utils.get_loss(args)
+        self.loss = utils.get_loss(config)
 
         self.gen_loss = []
         self.dec_loss = []
@@ -44,28 +51,48 @@ class ModelRunner:
         self.epoch = 0
 
 
-        #maybe think about setting 
+    def load_generator(self, config: dict) -> None:
+        """
+        Loads a generator state into self.generator .
+        :param : .
 
-    def load_generator(self):
-        pass
+        """
+        ...
 
-    def load_decoders(self):
-        pass
+    def load_decoders(self, config: dict) -> None:
+        """
+        Loads a generator state into self.generator .
+        :param : .
 
-    def train(self):
+        """
+        ...
 
-        # maybe make ConditionalNoiseGen class(see GEBM)
+
+    def train(self) -> None:
+        """
+        Trains the Agent for a set number of epochs
+
+        :return: None
+        """
+
         while self.epoch < self.max_train_epoch:
             self.train_epoch()
 
-    def train_epoch(self):
+
+    def train_epoch(self) -> None:
+        """
+        Trains the Agent for an individual epoch
+
+        For each batch of the dataset first the decoder is trained
+        and then the generator. 
+
+        :return: None
+        """
 
         for batch_idx, data in enumerate(self.train_loader):
 
             decoders_loss = self.batch_step(data,'decoders',train_mode=True)
-            # might have to specifity which loss
             self.dec_loss.append(decoders_loss)
-
             generator_loss = self.batch_step(data,'generator',train_mode=True)
             self.gen_loss.append(generator_loss)
 
@@ -76,12 +103,15 @@ class ModelRunner:
 
     
 
-    def eval(self):
-        pass
+    def batch_step(self,data,net_type,train_mode) -> None:
+        """
+        Trains the Agent for a single batch
 
-    def batch_step(self,data,net_type,train_mode):
+        :return: None
+        """
 
-        # modified from https://github.com/MichaelArbel/GeneralizedEBM/blob/b2fb244bacef23a7347aecc0e8ff4863153f94f0/trainer.py#L165
+        # modified from https://github.com/MichaelArbel/GeneralizedEBM/
+        # blob/b2fb244bacef23a7347aecc0e8ff4863153f94f0/trainer.py#L165
 
         optimizer = self.prepare_optimizer(net_type)
 
@@ -113,10 +143,28 @@ class ModelRunner:
 
         return loss
 
-    def get_real_targets(self,data):
 
-        # v1 - write better
+    def eval(self) -> None:
+        """
+        Evaluate the performance of the Generator
 
+        :return: None
+        """
+        ...
+
+    def get_real_targets(self,data) -> dict:
+        """
+        Generate the targets for the decoders given the data is real
+
+        :param data: torch.Tensor denoting the data from the batch. This
+            contains the images (for the gan task) and the targets for the 
+            individual tasks
+
+        :return out: dict of targets for (example {"gan":[1,1,1..],"coarse": \
+            [12,4,11,8,2...],"fine": [34,89,45,23..]})
+        """
+
+        # TO DO: improve (maybe merch with real)
         out = {'gan': torch.ones(len(data['images']))}
 
         for task in self.args['tasks']:
@@ -126,10 +174,19 @@ class ModelRunner:
                 out[task] = data[task]
         return out
 
-    def get_fake_targets(self,data):
+    def get_fake_targets(self,data) -> dict:
+        """
+        Generate the targets for the decoders given the data is fake
 
-        # v1 - write better
+        :param data: torch.Tensor denoting the data from the batch. This
+            contains the images (for the gan task) and the targets for the 
+            individual tasks
 
+        :return out: dict of targets for (example {"gan":[0,0,0..],"coarse": \
+            [12,4,11,8,2...],"fine": [34,89,45,23..]})
+        """
+
+        # TO DO: improve (maybe merch with real)
         out = {'gan': torch.zeros(len(data))}
 
         for task in self.args['tasks']:
@@ -145,8 +202,16 @@ class ModelRunner:
 
 
     def prepare_optimizer(self,net_type):
+        """
+        Prepare the optimizers for training
 
-        # from https://github.com/MichaelArbel/GeneralizedEBM/blob/b2fb244bacef23a7347aecc0e8ff4863153f94f0/trainer.py#L165
+        :param net_type: str denoting which of the networks is being trained
+            from this we then set it to .train() and the other to .eval()
+
+        :return None:
+        """
+        # from https://github.com/MichaelArbel/GeneralizedEBM/blob/b2fb244bacef
+        # 23a7347aecc0e8ff4863153f94f0/trainer.py#L165
 
         if net_type=='decoders':           
             optimizer = self.optimizer_d
@@ -159,5 +224,18 @@ class ModelRunner:
         optimizer.zero_grad()
         return optimizer
 
-    def tb_log(self, decoders_loss: dict, generator_loss: dict, batch_idx: int, train_loader_size: int):
-        self.writer.add_scalars('gan loss', {'g': generator_loss['gan'].item(), 'd': decoders_loss['gan'].item()}, train_loader_size* self.epoch + batch_idx + 1)
+    def tb_log(self, decoders_loss: dict, generator_loss: dict, \
+        batch_idx: int, train_loader_size: int) -> None:
+        """
+        Write to Tensorbaord
+
+        :param decoders_loss: dict denoting the losses of each task for the decoders
+        :param generator_loss: dict denoting the losses of each task for the generator
+        :param batch_idx: int denoting the current batch index for indexing to viz
+        :param train_loader_size: int denoting the size of the training set
+
+        :return None:
+        """
+
+        self.writer.add_scalars('gan loss', {'g': generator_loss['gan'].item(),\
+             'd': decoders_loss['gan'].item()}, train_loader_size* self.epoch + batch_idx + 1)

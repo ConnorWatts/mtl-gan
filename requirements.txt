@@ -1,0 +1,8 @@
+torch==1.13.0
+torchvision==0.11.3
+numpy==1.23.3
+pandas==1.5.2
+scipy
+sklearn
+matplotlib
+requests

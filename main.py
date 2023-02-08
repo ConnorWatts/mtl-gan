@@ -17,6 +17,7 @@ def main(args) -> None:
         raise NotImplementedError('Running mode {} not recognised.'.format(args['mode']))
 
 def get_args() -> dict:
+
     parser = argparse.ArgumentParser(description='MTL GAN')
 
     parser.add_argument("--num_workers", type=int, help="Number of Workers", default=0)
@@ -24,7 +25,6 @@ def get_args() -> dict:
     parser.add_argument("--dataset", type=str, help="Dataset name", default="Cifar100")
     parser.add_argument("--z_dim", type=int, help="Dimension of latent dimension", default=100)
     parser.add_argument("--nn_type", type=str, help="Neural network name", default="DCGAN-SN")
-    #parser.add_argument("--nn_type", type=str, help="Neural network name", default="Test")
     parser.add_argument("--seed", type=int, help="Seed of randomness", default=4)
     parser.add_argument("--device", type=int,  help="Device for running", default=1)
     parser.add_argument("--latent_noise", type=str, help="Distribution of random noise", default="uniform")
@@ -37,7 +37,7 @@ def get_args() -> dict:
     parser.add_argument("--loss_weights", type=dict, help="List of weights for the losses", default={'gan':0.3,'fine':0.3,'coarse':0.3})
     parser.add_argument("--enable_tensorboard", type=bool, help="Flag to enable tensorboard", default=True)
 
-
+    # optimizer arguments
     parser.add_argument('--optimizer', default='Adam', type= str, help='Optimizer for model')
     parser.add_argument('--lr_heads', default=0.0002, type=float, help='learning rate for the heads module')
     parser.add_argument('--lr_generator', default=0.0002, type=float, help='learning rate for the generator')

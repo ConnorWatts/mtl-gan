@@ -11,7 +11,5 @@ class MultiTaskDecoder(nn.Module):
         self.tasks = tasks
 
     def forward(self, x):
-        #what is the point of out_size
-        #out_size = x.size()[2:]
         shared_representation = self.decoder(x)
         return {task: self.heads[task](shared_representation) for task in self.tasks}
