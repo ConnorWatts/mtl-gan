@@ -26,6 +26,7 @@ To train run the below;
 
 ```
 python main.py 
+```
 
 
 ### Hardware
